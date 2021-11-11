@@ -145,12 +145,7 @@ class CadenceButton(QPushButton):
         self.__mouse_curr_pos = ev
         if ev.button() == Qt.LeftButton:
             if Global.btn_on_move is None:
-
-                if self.system_command.startswith('/usr/bin/'):
-                    os.system(self.system_command)
-
-                else:
-                    os.write(3, bytes(self.system_command.encode()))
+                os.system(self.system_command)
                 super().mousePressEvent(ev)
             else:
                 self.stop_moving_event.emit(self)
