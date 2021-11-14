@@ -64,7 +64,7 @@ def init_shared_globals(default_f10_path: str):
     global path_to_save
     global path_to_additional_files
 
-    path_to_save = f'{os.getenv("WORKAREA")}/F10'
+    path_to_save = os.getcwd()
     if not os.path.isdir(path_to_save):
         os.system(f'mkdir {path_to_save}')
     path_to_additional_files = default_f10_path
@@ -139,8 +139,6 @@ def save_configurations():
     global btn_size_attributes
     file = f'{path_to_save}/Side_Menu_Config.pickle'
     config_dict = {'NUM_OF_BUTTONS': number_of_btn_in_row, 'BOLD_BTNS': bold_all_btns, 'BTNS_SIZE': btn_size}
-    if not os.path.exists(file):
-        os.system(f' touch {file}')
     with open(os.path.expanduser(file), "wb") as f:
         pickle.dump(config_dict, f)
 

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMainWindow, QAction, QScrollArea, QTabWidget, QLine
     QInputDialog, QMessageBox, QShortcut
 from MainFrame import MainFrame
 from PyQt5.QtGui import QPalette, QMouseEvent, QKeySequence
-from PyQt5.QtCore import QCoreApplication, Qt
+from PyQt5.QtCore import QCoreApplication, Qt, QEvent
 from CadenceButton import CadenceButton
 from SingleOptionChooseDialog import ChooseSection, ChooseTabType, RemoveTabType
 
@@ -66,14 +66,15 @@ class MainWindow(QMainWindow):
 
         # Create tab menu.
         self.tabs = QTabWidget()
-        self.add_tab()
-        self.add_tab("User")
-        sys.path.insert(0, Global.path_to_additional_files)
-        from TabTypes import tab_types_extra_info
-        for title in tab_types_extra_info.keys():
-            btn_set = self.create_btn_set(title)
-            self.add_tab(title, btn_set)
-        #self.load_custom_tabs()
+        self.tabs.tabBar().installEventFilter(self)
+        #self.add_tab()
+        #self.add_tab("User")
+        #sys.path.insert(0, Global.path_to_additional_files)
+        #from TabTypes import tab_types_extra_info
+        #for title in tab_types_extra_info.keys():
+        #    btn_set = self.create_btn_set(title)
+        #    self.add_tab(title, btn_set)
+        self.load_custom_tabs()
         self.tabs.tabBarClicked[int].connect(self.resize_tab_window)
 
         if Global.bold_all_btns:
@@ -86,9 +87,10 @@ class MainWindow(QMainWindow):
 
         # Set window's style ( GUI representation ).
         self.tabs.setBackgroundRole(QPalette.Base)
-        workarea = os.getenv("WORKAREA").split("/")[-1]
-        self.setWindowTitle(f'Side Menu 1.6 - Workarea: {workarea}')
+        self.setWindowTitle('Buttons Dashboard')
         self.setFixedSize((Global.btn_size + 15) * Global.number_of_btn_in_row, self.height())
+        if self.tabs.count() == 0 :
+            self.add_tab("default tab")
         self.tabs.widget(0).widget().resize_window_height()
 
     def set_menu_bar(self):
@@ -221,7 +223,7 @@ class MainWindow(QMainWindow):
     Brief - Select tab to add to window
 
     """
-    def add_new_tab(self, title):
+    def add_new_tab(self):
         title, ok = QInputDialog.getText(self, 'Add Tab', 'Enter new tab name:')
         if ok and title != "":
             options = []
@@ -360,8 +362,8 @@ class MainWindow(QMainWindow):
         """
         Load custom tabs from files when starting up the tool
         """
-        for dir_name in os.listdir(os.path.expanduser(f"~/")):
-            if dir_name.find("_btns.pickle") != -1 and dir_name not in ['User_btns.pickle', 'Default_btns.pickle']:
+        for dir_name in os.listdir(Global.path_to_save):
+            if dir_name.find("_btns.pickle") != -1:
                 title = str(dir_name.split("_btns.pick")[0]).replace(".f10.", " ")
                 self.add_tab(title)
 
@@ -377,7 +379,7 @@ class MainWindow(QMainWindow):
         elif title == "User":
             self.frames.append(MainFrame(True, title, btn_set=btn_set))
         else:
-            self.frames.append(MainFrame(False, title, btn_set=btn_set))
+            self.frames.append(MainFrame(True, title, btn_set=btn_set))
         self.frames_scroll_areas.append(QScrollArea())
         self.frames_scroll_areas[-1].setWidgetResizable(True)
         self.frames_scroll_areas[-1].setWidget(self.frames[-1])
@@ -408,8 +410,28 @@ class MainWindow(QMainWindow):
         if Global.btn_on_move is not None:
             Global.btn_on_move.mouseMoveEvent(ev)
 
-
+    def eventFilter(self, object, event):
+        if object == self.tabs.tabBar() and \
+            event.type() in [QEvent.MouseButtonPress, 
+                             QEvent.MouseButtonRelease] and \
+            event.button() == Qt.RightButton: 
+            tab_index = object.tabAt(event.pos())
+            if event.type() == QEvent.MouseButtonPress:
+                title, ok = QInputDialog.getText(self, f'Change Tab Current Name: {self.tabs.tabText(tab_index)}', 'Enter new tab name:')
+                if ok and title != "":
+                    file = self.tabs.tabText(tab_index).replace(" ", ".f10.")
+                    if os.path.isfile(f'{Global.path_to_save}\{file}_btns.pickle'):
+                        os.remove(f'{Global.path_to_save}\{file}_btns.pickle')
+                    for frame in self.frames:
+                        if frame.tab_name == self.tabs.tabText(tab_index):
+                            frame.tab_name = title
+                    self.tabs.setTabText(tab_index, title)
+                    
+                    self.save_buttons(title)
+            return True               
+        return False
     ############################################################################
+    #                                                          
     #                                                                          #
     #                                                                          #
     #                           Buttons Methods                                #
@@ -470,8 +492,6 @@ class MainWindow(QMainWindow):
                                 save_dictionary[section.get_section_title()][btn.title] = btn.current_color
                     tab_title = tab_title.replace(" ", ".f10.")
                     btn_file_path = f'{Global.path_to_save}/{tab_title}_btns.pickle'
-                    if not os.path.exists(btn_file_path):
-                        os.system(f' touch {btn_file_path}')
                     with open(btn_file_path, 'wb') as f:
                         pickle.dump(save_dictionary, f)
 

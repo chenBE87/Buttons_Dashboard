@@ -403,7 +403,7 @@ class MainFrame(QWidget):
                 if self.tab_name != "User" and 'tooltip' in val.keys() and val['tooltip'] != '':
                     coll.set_tooltip(val['tooltip'])
 
-                buttons = val['buttons'] if self.tab_name != "User" else val
+                buttons = val
                 for name, props in buttons.items():
                     if not self.editable:
                         color = 'lightGray'
