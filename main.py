@@ -10,7 +10,7 @@ import argparse
 def main():
 
     parser = argparse.ArgumentParser(description='Dashboard of buttons for encapsulating command as action button.')
-    parser.add_argument('-dir', help='Directory where the extra files are located ( defaultF10 & TabFiles ).',
+    parser.add_argument('-dir', help='Directory where the extra files are located.',
                         dest='directory', type=str, required=True)
     args = parser.parse_args()
     current_exit_code = Global.REBOOT_CODE
