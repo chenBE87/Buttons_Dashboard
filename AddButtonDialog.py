@@ -157,6 +157,7 @@ class AddButtonDialog(QDialog):
             #self.output_variables_list = [item.text() for item in self.variable_list.selectedItems()]
             if len(self.variable_list.selectedItems()) == 0:
                 QMessageBox.warning(self, 'Button not selected', 'No button has been selected !')
+                return
             else:
                 #self.output_variables_list.insert(0, self.EXIST_BTN_INDEX)
                 title = self.variable_list.selectedItems()[0].text()
@@ -171,6 +172,7 @@ class AddButtonDialog(QDialog):
             if self.new_btn_desc_input.text() == '' or self.new_btn_name_input.text() == '' \
                                                     or self.new_btn_proc_input.text() == '':
                 QMessageBox.warning(self, 'Button not selected', 'Please fill all fields for creating new button !')
+                return
             else:
                 self.output_variables_list = [self.NEW_BTN_INDEX, self.new_btn_name_input.text(),
                                               self.new_btn_proc_input.text(), self.new_btn_desc_input.text()]

@@ -1,7 +1,10 @@
 import os
+import subprocess
+import webbrowser
 
 from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QMouseEvent, QCursor
+from SelectNumberDialog import SelectIntegerDialog
 from PyQt5.QtWidgets import QPushButton, QLabel, QHBoxLayout, QSizePolicy, QMenu, QAction, QColorDialog, QMessageBox, \
     QLineEdit, QInputDialog, QWidget
 
@@ -145,7 +148,13 @@ class CadenceButton(QPushButton):
         self.__mouse_curr_pos = ev
         if ev.button() == Qt.LeftButton:
             if Global.btn_on_move is None:
-                os.system(self.system_command)
+                if self.system_command.startswith('http'):
+                    webbrowser.open_new_tab(self.system_command)
+                elif hasattr(self, self.system_command) and callable(getattr(self, self.system_command)):
+                    getattr(self, self.system_command)()
+                else:
+                    subprocess.run(self.system_command)
+                    #os.system(self.system_command)
                 super().mousePressEvent(ev)
             else:
                 self.stop_moving_event.emit(self)
@@ -372,3 +381,25 @@ class CadenceButton(QPushButton):
         """
         font_weight = 'bold' if to_bold else 'normal'
         self.lbl.setStyleSheet(f'font-weight: {font_weight};color: black; font-size: {Global.label_font_size}px;')
+
+    ############################################################################
+    #                                                                          #
+    #                                                                          #
+    #                           Default BTN Methods                            #
+    #                                                                          #
+    ############################################################################
+
+    def run_vnc_viewer(self, site: str):
+
+        vnc_num = SelectIntegerDialog().get_integer()
+        if vnc_num != -1:
+            cmd = rf'"C:\Program Files\RealVNC\VNC Viewer\vncviewer.exe" {site}-qauto-{str(vnc_num).zfill(3)}.wap.labs.mlnx:1'
+            subprocess.run(cmd)
+
+    def run_vnc_viewer_mtl(self):
+        self.run_vnc_viewer('mtl')
+
+    def run_vnc_viewer_mtr(self):
+        self.run_vnc_viewer('mtr')
+
+

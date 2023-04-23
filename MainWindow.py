@@ -178,9 +178,9 @@ class MainWindow(QMainWindow):
     def add_section(self):
         text, ok_pressed = QInputDialog.getText(self, "Get text", "New Section Name", QLineEdit.Normal, "")
         if ok_pressed and text != '':
-            self.frames[1].add_section(text, self.frames[1].sections.count())
+            self.frames[-1].add_section(text, self.frames[-1].sections.count())
             self.tabs.currentWidget().widget().resize_window_height()
-            self.save_buttons(self.frames[1].tab_name)
+            self.save_buttons(self.frames[-1].tab_name)
 
     def change_btns_size(self):
         """

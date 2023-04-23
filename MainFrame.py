@@ -349,7 +349,7 @@ class MainFrame(QWidget):
 
     def resize_window_height(self):
         total_height = 0
-        screen_height_factor = 0.9
+        screen_height_factor = 1.2
         for i in range(self.sections.count()):
             num_of_rows = self.sections.itemAt(i).widget().get_grid().count()
             if total_height + TITLE_HEIGHT_FACTOR - Global.screen_height*screen_height_factor < 0:
@@ -357,7 +357,7 @@ class MainFrame(QWidget):
             for j in range(0, num_of_rows):
                 if total_height + Global.btn_height - Global.screen_height*screen_height_factor < 0:
                     total_height += Global.btn_height
-        total_height = max(total_height, 300)
+        total_height = max(total_height, 700)
         self.window().setFixedSize(Global.btn_width*Global.number_of_btn_in_row, total_height)
         self.setFixedSize(Global.btn_width*Global.number_of_btn_in_row, total_height)
         self.setLayout(self.sections)
